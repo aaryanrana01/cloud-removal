@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* Palette taken from remote-sensing imagery:
+   mineral  - pale ground tone for the page
+   ink      - deep slate for text
+   signal   - the red that vegetation shows in false-colour Landsat composites; used for actions
+   change   - amber, used ONLY for the "what changed" map */
+@theme {
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-mineral: #edf1ef;
+  --color-mineral-deep: #dfe6e3;
+  --color-ink: #16262e;
+  --color-ink-soft: #4a5c63;
+  --color-line: #c6d1ce;
+  --color-signal: #c2412f;
+  --color-signal-dark: #a33424;
+  --color-change: #f2b730;
+}
+
+@layer base {
+  html {
+    background: var(--color-mineral);
+    color: var(--color-ink);
+    font-feature-settings: "tnum" 1;          /* numbers line up in tables */
+    -webkit-font-smoothing: antialiased;
+  }
+  body { font-size: 1rem; line-height: 1.55; }
+  ::selection { background: var(--color-change); color: var(--color-ink); }
+  :focus-visible { outline: 2.5px solid var(--color-signal); outline-offset: 2px; }
+}
+
+@layer components {
+  /* Expanded width for headings, like the title block of a map sheet. */
+  .display { font-stretch: 122%; letter-spacing: -0.01em; }
+}
+
+/* The single orchestrated motion: a scan line while the model is working. */
+@keyframes scan {
+  from { transform: translateY(-10%); }
+  to   { transform: translateY(1000%); }
+}
+.scanline { animation: scan 1.6s cubic-bezier(.45,0,.55,1) infinite alternate; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scanline { animation: none; opacity: 0; }
+}

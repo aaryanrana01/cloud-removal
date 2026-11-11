@@ -1,0 +1,59 @@
+# Pushes the app to a Hugging Face Space whenever CI passes on main.
+#
+# One-time setup in GitHub -> Settings -> Secrets and variables -> Actions:
+#   Secret    HF_TOKEN        a Hugging Face token with write access
+#   Variable  HF_SPACE        e.g. your-hf-username/cloud-removal
+#   Variable  HF_MODEL_REPO   e.g. your-hf-username/cloud-removal-swin   (where best.pt lives)
+name: Deploy to Hugging Face
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE: ${{ vars.HF_SPACE }}
+      HF_MODEL_REPO: ${{ vars.HF_MODEL_REPO }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check configuration
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
+            echo "::error::Set the HF_TOKEN secret and HF_SPACE variable (see the top of this file)."
+            exit 1
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install huggingface_hub
+      - name: Copy only what the Space needs
+        run: |
+          mkdir -p deploy
+          cp -r Dockerfile .dockerignore requirements.txt cloudremoval server results web deploy/
+          rm -rf deploy/web/node_modules deploy/web/dist
+          cp space/README.md deploy/README.md
+      - name: Upload to the Space and point it at the model weights
+        run: |
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          space = os.environ["HF_SPACE"]
+          api.create_repo(space, repo_type="space", space_sdk="docker", exist_ok=True)
+          if os.environ.get("HF_MODEL_REPO"):
+              api.add_space_variable(space, "MODEL_REPO", os.environ["HF_MODEL_REPO"])
+          api.upload_folder(folder_path="deploy", repo_id=space, repo_type="space",
+                            delete_patterns="*", commit_message=f"Deploy {os.environ['GITHUB_SHA'][:7]}")
+          print(f"Deployed -> https://huggingface.co/spaces/{space}")
+          EOF

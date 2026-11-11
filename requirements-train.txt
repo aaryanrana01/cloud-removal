@@ -1,0 +1,7 @@
+# Training + evaluation (Colab already has torch/torchvision with CUDA).
+-r requirements.txt
+torch>=2.2
+torchvision>=0.17
+scikit-image>=0.22
+matplotlib>=3.8
+kaggle>=1.6

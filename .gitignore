@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Node
+web/node_modules/
+web/dist/
+
+# Data, training runs and weights (weights live on Hugging Face, not GitHub)
+data/
+runs/
+weights/
+*.pt
+*.pth
+*.zip
+kaggle.json
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+.env

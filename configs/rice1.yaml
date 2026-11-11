@@ -1,0 +1,36 @@
+# Default experiment: Swin U-Net on RICE1 (500 RGB pairs, 512x512).
+# Change values here instead of editing code.
+
+model:
+  in_ch: 3
+  embed_dim: 48
+  depths: [2, 2, 2]
+  num_heads: [3, 6, 12]
+  bottleneck_depth: 2
+  window_size: 8
+  mlp_ratio: 2.0
+  grad_checkpoint: false
+
+data:
+  root: ""            # set with --data-root, or found automatically in the Colab notebook
+  crop_size: 256
+  repeats: 4
+  val_fraction: 0.1
+  test_fraction: 0.2
+  seed: 42
+
+train:
+  out_dir: runs/rice1
+  epochs: 60
+  batch_size: 8
+  lr: 0.0002
+  weight_decay: 0.02
+  warmup_epochs: 3
+  patience: 15
+  w_l1: 1.0
+  w_ssim: 0.5
+  w_perceptual: 0.05
+  amp: true
+  num_workers: 2
+  seed: 42
+  save_every: 10

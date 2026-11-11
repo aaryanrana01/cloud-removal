@@ -1,0 +1,20 @@
+[project]
+name = "cloudremoval"
+version = "1.0.0"
+description = "Cloud removal from satellite images with a Swin Transformer U-Net"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 140
+extend-exclude = ["notebooks"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E731", "B008", "B905"]   # tiny lambdas; FastAPI File(...) default; zip(strict=) noise
